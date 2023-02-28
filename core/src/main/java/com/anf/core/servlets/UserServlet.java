@@ -18,11 +18,16 @@ package com.anf.core.servlets;
 import com.anf.core.services.ContentService;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -41,6 +46,27 @@ public class UserServlet extends SlingSafeMethodsServlet {
     @Override
     protected void doGet(final SlingHttpServletRequest req,
             final SlingHttpServletResponse resp) throws ServletException, IOException {
-        // Make use of ContentService to write the business logic
+    	ResourceResolver resolver=req.getResourceResolver();
+    	Session session=(Session) resolver.adaptTo(ResourceResolver.class);
+    	Resource resource=resolver.getResource("/var/ommer/form/data");
+    	String firstName=req.getParameter("fname");
+    	String lastName=req.getParameter("lname");
+    	String age=req.getParameter("age");
+    	String country=req.getParameter("country");
+    	Node user=resource.adaptTo(Node.class);
+    	
+    	try {
+    		user.setProperty("firstName", firstName);
+			user.setProperty("lastName", lastName);
+			user.setProperty("age", age);
+	    	user.setProperty("country", country);
+	    	session.save();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	resp.getWriter().print("Form DataSaved");
+    	
     }
 }
